@@ -1,5 +1,21 @@
 from torchvision import datasets
 import csv
+import pandas as pd
+import numpy as np
+
+# for the second Class
+from torchtext.utils import (
+    download_from_url,
+)
+from torchtext.data.datasets_utils import (
+    _RawTextIterableDataset,
+    _wrap_split_argument,
+    _add_docstring_header,
+    _create_dataset_directory,
+    _create_data_from_csv,
+)
+import os
+from string import punctuation
 
 
 class ImageFolder2CSV:
@@ -54,3 +70,67 @@ class ImageFolder2CSV:
                     splittedAndLabel.append(j.item())
                     
                 csv_out.writerow(splittedAndLabel)
+
+
+class IterableDatasetForRawData:
+    """
+    Creates a raw Iterable dataset out of a normal csv
+    Converts the csv the needed csv
+    
+    Is Not Dataset Specific, Modify to meet needs
+
+    """
+    
+    def read_csv(self, path):
+        # read a csv file
+        data = pd.read_csv(path) 
+
+        # Converting the data to labels and data
+        reviews = np.array(data['review']).tolist()
+        labels = np.array(data['sentiment']).tolist()
+
+        #modify to meet particular data
+        reviews = [c for c in reviews if c not in punctuation]
+        labels = [1 if label == 'positive' else 0 for label in labels]
+
+        return reviews, labels
+    
+    def toCSV(self, path, relativePath):
+        """
+        Takes in a csv file and converts it to the needed format
+        Args: 
+            path -->  the name of the new csv
+            relativePath --> the path to the old csv
+        """
+
+        # create a csv file
+        reviews, labels = self.read_csv(relativePath)
+        with open(path, 'w') as f:
+            csv_out = csv.writer(f)
+            for i in range(len(reviews)):
+                csv_out.writerow([ str(labels[i]), reviews[i] ])
+    
+    def tryOut(self, split, path):
+        NUM_LINES = {
+                'train': 50000
+                    }
+
+        DATASET_NAME = "IMDB"
+
+
+                # modify number of classes if your data has more than 2
+        @_add_docstring_header(num_lines=NUM_LINES, num_classes=2)
+        #@_create_dataset_directory(dataset_name=DATASET_NAME)
+        @_wrap_split_argument(('train'))
+
+        #Modify name according to the dataset
+        def Data(root, split):
+        
+            return _RawTextIterableDataset(DATASET_NAME,NUM_LINES[split],
+                                        _create_data_from_csv(path))
+        return Data(split)
+
+    
+    
+
+
