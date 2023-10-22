@@ -75,7 +75,7 @@ class ImageFolder2CSV:
 class IterableDatasetForRawData:
     """
     Creates a raw Iterable dataset out of a normal csv
-    Converts the csv the needed csv
+    Converts the csv the needed format
     
     Is Not Dataset Specific, Modify to meet needs
 
